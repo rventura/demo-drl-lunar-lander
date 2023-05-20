@@ -1,4 +1,6 @@
+#! /usr/bin/env python3
 
+import sys
 import random
 import numpy as np
 import gymnasium as gym
@@ -11,10 +13,10 @@ from tqdm import tqdm
 
 class DQN:
     BATCH_SIZE = 100
-    N_EPISODES = 1000
+    N_EPISODES = 250
     LEARNING_RATE = 0.001
     DISCOUNT_FACTOR = 0.9
-    EPSILON_INITIAL = 0.5
+    EPSILON_INITIAL = 1
     EPSILON_DECAY = 0.99
     D = 50
 
@@ -46,13 +48,16 @@ class DQN:
 
     def train(self):
         self.pool = []
-        average_rewards = []
+        stats_rewards = []
+        stats_epsilon = []
+        stats_loss = []
         self.iteration = 1
         self.epsilon = self.EPSILON_INITIAL
         self.env = gym.make("LunarLander-v2")
         for i in tqdm(range(self.N_EPISODES)):
             observation, info = self.env.reset()
             episode_rewards = []
+            episode_loss = []
             while True:
                 action = self.epsilon_policy(observation)
                 next_observation, reward, terminated, truncated, next_info = self.env.step(action)
@@ -62,13 +67,24 @@ class DQN:
                     break
                 else:
                     self.pool.append((observation, action, reward, next_observation, False))
-                self.train_step()
+                loss = self.train_step()
+                if loss is not None:
+                    episode_loss.append(loss)
                 self.iteration += 1
                 observation = next_observation
-            average_rewards.append(np.mean(episode_rewards))
+            if len(episode_rewards)>0:
+                stats_rewards.append(np.mean(episode_rewards))
+            if len(episode_loss)>0:
+                stats_loss.append(np.mean(episode_loss))
+            stats_epsilon.append(self.epsilon)
             self.epsilon *= self.EPSILON_DECAY
-        plt.plot(average_rewards)
-        plt.show(block=False)
+        plt.subplot(311)
+        plt.plot(stats_rewards)
+        plt.subplot(312)
+        plt.plot(stats_loss)
+        plt.subplot(313)
+        plt.plot(stats_epsilon)
+        plt.show()
         print(f"Statistics:\n  final epsilon = {self.epsilon}\n  # of steps = {self.iteration}\n  # of episodes = {self.N_EPISODES}")
         
     def train_step(self):
@@ -92,6 +108,7 @@ class DQN:
             #
             if self.iteration%self.D==0:
                 self.copy_parameters(self.model, self.model_hat)
+            return float(loss)
 
     def demo(self):
         self.env = gym.make("LunarLander-v2", render_mode="human")
@@ -103,15 +120,31 @@ class DQN:
                 if terminated or truncated:
                     break
                 observation = next_observation
-        
 
-def main():
-    agent = DQN()
-    agent.train()
-    agent.demo()
+    def save(self, filename):
+        torch.save(self.model, filename)
+
+    def load(self, filename):
+        self.model = torch.load(filename)
+
+
+def main(argv):
+    if len(argv)<2 or argv[1]=='help':
+        print(f"Usage: {argv[0]} <cmd> [<args>*]\n  <cmd> = help | train | demo")
+    elif argv[1]=='train':
+        agent = DQN()
+        agent.train()
+        agent.save(argv[2] if len(argv)>2 else "dqn.model")
+    elif argv[1]=='demo':
+        agent = DQN()
+        agent.load(argv[2] if len(argv)>2 else "dqn.model")
+        agent.demo()
+    else:
+        print(f"*** Invalid command; use \"{argv[0]} help\" for help.")
+
 
     
 if __name__=='__main__':
-    main()
+    main(sys.argv)
 
 # EOF
