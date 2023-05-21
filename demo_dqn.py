@@ -36,6 +36,12 @@ class DQN:
     def copy_parameters(self, src, dst):
         dst.load_state_dict(src.state_dict())
 
+    def save(self, filename):
+        torch.save(self.model, filename)
+
+    def load(self, filename):
+        self.model = torch.load(filename)
+
     def optimal_policy(self, observation):
         output = self.model(torch.from_numpy(observation))
         return int(output.argmax())
@@ -47,7 +53,7 @@ class DQN:
             return self.optimal_policy(observation)
 
     def train(self):
-        self.pool = []
+        self.dataset = []
         stats_rewards = []
         stats_epsilon = []
         stats_loss = []
@@ -63,10 +69,10 @@ class DQN:
                 next_observation, reward, terminated, truncated, next_info = self.env.step(action)
                 episode_rewards.append(reward)
                 if terminated or truncated:
-                    self.pool.append((observation, action, reward, next_observation, True))
+                    self.dataset.append((observation, action, reward, next_observation, True))
                     break
                 else:
-                    self.pool.append((observation, action, reward, next_observation, False))
+                    self.dataset.append((observation, action, reward, next_observation, False))
                 loss = self.train_step()
                 if loss is not None:
                     episode_loss.append(loss)
@@ -88,8 +94,8 @@ class DQN:
         print(f"Statistics:\n  final epsilon = {self.epsilon}\n  # of steps = {self.iteration}\n  # of episodes = {self.N_EPISODES}")
         
     def train_step(self):
-        if len(self.pool)>=self.BATCH_SIZE:
-            minibatch = random.sample(self.pool, self.BATCH_SIZE)
+        if len(self.dataset)>=self.BATCH_SIZE:
+            minibatch = random.sample(self.dataset, self.BATCH_SIZE)
             next_states = torch.from_numpy(np.array([step[3] for step in minibatch]))
             # NOTE: this should be done with frozen weights
             next_q = self.model_hat(next_states)
@@ -121,16 +127,10 @@ class DQN:
                     break
                 observation = next_observation
 
-    def save(self, filename):
-        torch.save(self.model, filename)
-
-    def load(self, filename):
-        self.model = torch.load(filename)
-
 
 def main(argv):
     if len(argv)<2 or argv[1]=='help':
-        print(f"Usage: {argv[0]} <cmd> [<args>*]\n  <cmd> = help | train | demo")
+        print(f"Usage: {argv[0]} <cmd> [<args>*]\n  <cmd> = help | train | demo ")
     elif argv[1]=='train':
         agent = DQN()
         agent.train()
@@ -141,7 +141,6 @@ def main(argv):
         agent.demo()
     else:
         print(f"*** Invalid command; use \"{argv[0]} help\" for help.")
-
 
     
 if __name__=='__main__':
