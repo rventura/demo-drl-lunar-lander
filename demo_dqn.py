@@ -31,6 +31,8 @@ class DQN:
         return nn.Sequential(
             nn.Linear(8, 16),
             nn.ReLU(),
+            # nn.Linear(16, 16),
+            # nn.ReLU(),
             nn.Linear(16, 4))
 
     def copy_parameters(self, src, dst):
