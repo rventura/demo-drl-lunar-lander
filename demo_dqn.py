@@ -20,6 +20,7 @@ class DQN:
     EPSILON_DECAY = 0.99
     D = 50
     USE_MPS = False
+    USE_CUDA = False
 
     def __init__(self):
         self.dev_init()
@@ -32,8 +33,13 @@ class DQN:
     def dev_init(self):
         if self.USE_MPS and torch.backends.mps.is_available():
             self.dev = torch.device("mps")
+            print("Using MPS backend")
+        elif self.USE_CUDA and torch.cuda.is_available():
+            self.dev = torch.device("cuda")
+            print("Using CUDA backend")
         else:
             self.dev = torch.device("cpu")
+            print("Using CPU backend")
 
     def model_factory(self):
         return nn.Sequential(
