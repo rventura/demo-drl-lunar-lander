@@ -19,21 +19,13 @@ class DQN:
     EPSILON_INITIAL = 1
     EPSILON_DECAY = 0.99
     D = 50
-    USE_MPS = False
 
     def __init__(self):
-        self.dev_init()
         self.model = self.model_factory()
         self.model_hat = self.model_factory()
         self.copy_parameters(self.model, self.model_hat)
         self.loss = nn.MSELoss()
         self.optimizer = optim.SGD(self.model.parameters(), lr=self.LEARNING_RATE)
-
-    def dev_init(self):
-        if self.USE_MPS and torch.backends.mps.is_available():
-            self.dev = torch.device("mps")
-        else:
-            self.dev = torch.device("cpu")
 
     def model_factory(self):
         return nn.Sequential(
@@ -41,7 +33,7 @@ class DQN:
             nn.ReLU(),
             # nn.Linear(16, 16),
             # nn.ReLU(),
-            nn.Linear(16, 4)).to(self.dev)
+            nn.Linear(16, 4))
 
     def copy_parameters(self, src, dst):
         dst.load_state_dict(src.state_dict())
@@ -53,7 +45,7 @@ class DQN:
         self.model = torch.load(filename)
 
     def optimal_policy(self, observation):
-        output = self.model(torch.from_numpy(observation).to(self.dev))
+        output = self.model(torch.from_numpy(observation))
         return int(output.argmax())
         
     def epsilon_policy(self, observation):
@@ -107,16 +99,17 @@ class DQN:
         if len(self.dataset)>=self.BATCH_SIZE:
             minibatch = random.sample(self.dataset, self.BATCH_SIZE)
             next_states = torch.from_numpy(np.array([step[3] for step in minibatch]))
-            next_q = self.model_hat(next_states.to(self.dev))
+            # NOTE: this should be done with frozen weights
+            next_q = self.model_hat(next_states)
             max_q = torch.amax(next_q, dim=1)
-            y = torch.tensor([step[2] for step in minibatch], dtype=torch.float32, device=self.dev)  # rewards
+            y = torch.tensor([step[2] for step in minibatch])  # rewards
             non_terminals = torch.tensor([not step[4] for step in minibatch])
             y[non_terminals] += self.DISCOUNT_FACTOR*max_q[non_terminals]
             #
             self.optimizer.zero_grad()
             inputs  = torch.from_numpy(np.array([step[0] for step in minibatch]))
             actions = torch.from_numpy(np.array([step[1] for step in minibatch]))
-            outputs = self.model(inputs.to(self.dev))
+            outputs = self.model(inputs)
             loss = self.loss(y.to(outputs.dtype), outputs[range(len(actions)),actions])
             loss.backward()
             self.optimizer.step()
