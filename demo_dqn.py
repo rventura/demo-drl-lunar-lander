@@ -132,7 +132,7 @@ class DQN:
 
 def main(argv):
     if len(argv)<2 or argv[1]=='help':
-        print(f"Usage: {argv[0]} <cmd> [<args>*]\n  <cmd> = help | train | demo ")
+        print(f"Usage: {argv[0]} <cmd> [<args>*]\n  <cmd> = help | train | demo\n  <args> is the filename of the model (default is dqn.model)")
     elif argv[1]=='train':
         agent = DQN()
         agent.train()
