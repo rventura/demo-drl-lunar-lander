@@ -68,7 +68,7 @@ Both of these commands take a second argument that is the DRL model filename (de
 
 # Author contact
 
-Rodrigo Ventura
-Institute for Systems and Robotics - Lisbon
-Instituto Superior Técnico
+Rodrigo Ventura<br/>
+Institute for Systems and Robotics - Lisbon<br/>
+Instituto Superior Técnico<br/>
 rodrigo.ventura (at) isr.tecnico.ulisboa.pt
