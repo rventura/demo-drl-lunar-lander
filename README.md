@@ -6,7 +6,37 @@ This demo was prepared to the elective workshop "Artificial Intelligence and Spa
 
 Python version 3
 
+## Windows
+
+Install Windows Subsystem for Linux (WSL) using the command
+
+    wsl --install
+
+Make sure you have Python venv installed using
+
+    sudo apt update
+    sudo apt install python3-virtualenv
+
+## Linux
+
+Make sure you have Python venv installed using
+
+    sudo apt update
+    sudo apt install python3-virtualenv
+
+## macOS
+
+Make sure you have Python 3 installed checking whether the command
+
+    python3 -V
+
+print Python version number (e.g., Python 3.8.9)
+
 # Installation instructions
+
+Clone the github repository using the command
+
+    git clone https://github.com/rventura/demo-drl-lunar-lander.git
 
 After cloning this repository, use the following commands to install requirements into a virtual environment:
 
@@ -16,9 +46,15 @@ After cloning this repository, use the following commands to install requirement
 
 # Usage
 
-Note that every time you want to run the code, you need to activate the virtual environment using the command:
+Note that every time you want to run the code, you need to activate the virtual environment using the command, at the directory the virtual environment was created (see previous step):
 
     source env/bin/activate
+
+To use the code, make sure the current directory is the repository, e.g.,
+
+    cd demo-drl-lunar-lander
+
+at the directory the github repository was cloned.
 
 To train a DRL model, use the command:
 
