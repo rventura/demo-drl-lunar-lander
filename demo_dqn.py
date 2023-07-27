@@ -87,11 +87,15 @@ class DQN:
             stats_epsilon.append(self.epsilon)
             self.epsilon *= self.EPSILON_DECAY
         plt.subplot(311)
-        plt.plot(stats_rewards)
+        plt.plot(stats_rewards, label="Average reward")
+        plt.legend()
         plt.subplot(312)
-        plt.plot(stats_loss)
+        plt.plot(stats_loss, label="Average loss")
+        plt.legend()
         plt.subplot(313)
-        plt.plot(stats_epsilon)
+        plt.plot(stats_epsilon, label="Epsilon")
+        plt.legend()
+        plt.xlabel("Episodes")
         plt.show()
         print(f"Statistics:\n  final epsilon = {self.epsilon}\n  # of steps = {self.iteration}\n  # of episodes = {self.N_EPISODES}")
         
