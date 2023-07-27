@@ -17,7 +17,7 @@ For more information, check [this link](https://learn.microsoft.com/en-us/window
 Make sure you have Python venv installed using
 
     sudo apt update
-    sudo apt install python3-virtualenv
+    sudo apt install python3-virtualenv python3-tk
 
 For more information, check [this link](https://stackoverflow.com/questions/71818928/python3-10-source-venv-has-changed).
 
