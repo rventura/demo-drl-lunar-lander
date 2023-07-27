@@ -10,12 +10,16 @@ Python version 3
 
 Install Windows Subsystem for Linux (WSL) using the command
 
-    wsl --install
+    wsl --install -d Ubuntu
+
+For more information, check [this link](https://learn.microsoft.com/en-us/windows/wsl/install).
 
 Make sure you have Python venv installed using
 
     sudo apt update
     sudo apt install python3-virtualenv
+
+For more information, check [this link](https://stackoverflow.com/questions/71818928/python3-10-source-venv-has-changed).
 
 ## Linux
 
